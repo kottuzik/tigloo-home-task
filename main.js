@@ -26,8 +26,10 @@ function createBoard() {
         cardElement.classList.add('memory-card');
         cardElement.textContent = card.isFlipped || card.isMatched ? card.value : "";
         cardElement.addEventListener('click', function () { return flipCard(card); });
-        if (card.isFlipped)
-            cardElement.classList.add('flipped');
+        if (card.isFlipped) {
+            cardElement.classList.remove('flipped');
+            setTimeout(function () { return cardElement.classList.add('flipped'); }, 0);
+        }
         if (card.isMatched)
             cardElement.classList.add('matched');
         gameBoard.appendChild(cardElement);
@@ -70,9 +72,15 @@ function resetBoard() {
     _a = [null, null, false], firstCard = _a[0], secondCard = _a[1], lockBoard = _a[2];
 }
 function checkForWin() {
-    var winnerMessage = document.getElementById('winnerMessage').value;
-    if (cards.every(function (card) { return card.isMatched; })) {
-        winnerMessage = "You won this game!";
+    var winnerMessage = document.getElementById('winnerMessage');
+    var confetti = document.getElementById('confetti');
+    if (winnerMessage && confetti && cards.every(function (card) { return card.isMatched; })) {
+        winnerMessage.innerText = "You won this game!";
+        confetti.attributeStyleMap.clear();
+        setTimeout(function () {
+            winnerMessage.innerText = "";
+            confetti.attributeStyleMap.set("display", "none");
+        }, 5000);
         setupGame();
     }
 }

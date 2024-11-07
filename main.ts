@@ -27,7 +27,10 @@ function createBoard() {
         cardElement.classList.add('memory-card');
         cardElement.textContent = card.isFlipped || card.isMatched ? card.value : "";
         cardElement.addEventListener('click', () => flipCard(card));
-        if(card.isFlipped) cardElement.classList.add('flipped');
+        if(card.isFlipped) {
+            cardElement.classList.remove('flipped');
+            setTimeout(() => cardElement.classList.add('flipped'), 0);
+        }
         if(card.isMatched) cardElement.classList.add('matched');
         gameBoard.appendChild(cardElement);
     })
@@ -68,10 +71,16 @@ function resetBoard() {
 }
 
 function checkForWin() {
-    let winnerMessage = (document.getElementById('winnerMessage') as HTMLInputElement).value;
-    if(cards.every(card => card.isMatched)){
-        winnerMessage = "You won this game!"
-        setupGame()
+    const winnerMessage = document.getElementById('winnerMessage')
+    const confetti = document.getElementById('confetti');
+    if(winnerMessage && confetti && cards.every(card => card.isMatched)){
+        winnerMessage.innerText = "You won this game!";
+        confetti.attributeStyleMap.clear();
+          setTimeout(() => {
+            winnerMessage.innerText = "";
+            confetti.attributeStyleMap.set("display", "none");
+        }, 5000);
+        setupGame();
     }
 }
  setupGame();
