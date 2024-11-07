@@ -6,18 +6,75 @@ interface Card {
 }
 const values = ['1', '2', '3', '4', '5', '6', '7', '8'];
 const gameBoard = document.getElementById("memoryGameBoard") as HTMLElement;
+const moveCounter = document.getElementById("moveCounter") as HTMLElement;
+const timerDisplay = document.getElementById("timer") as HTMLElement;
+const restartGame = document.getElementById("restartGame") as HTMLElement;
+
+
 let cards: Card[] = [];
 let firstCard: Card | null = null;
 let secondCard: Card | null = null;
 let lockBoard = false;
+let moves = 0;
+let timer: number;
+let time = 0;
+let countdownMode = false;
+let countdownStart = 90; //Countdown start time in seconds
+
+restartGame.addEventListener("click", setupGame);
 
 function setupGame() {
+    resetGame();
+    createDeck();
+    createBoard();
+    startTimer();
+}
+function createDeck() {
     const deck = [...values, ...values] //Duplicate values to get pairs
         .map((value, index) => ({ id: index, value, isFlipped: false, isMatched: false }))
         .sort(() => Math.random() - 0.5); //Shuffle the deck
 
         cards = deck;
         createBoard();
+}
+
+function resetGame() {
+    cards = [];
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+    moves = 0;
+    moveCounter.textContent = "0";
+    time = countdownMode ? countdownStart : 0;
+    timerDisplay.textContent = countdownMode ? formatTime(countdownStart) : "0:00"
+}
+
+function formatTime(seconds : number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+}
+function resetBoard() {
+    [firstCard, secondCard, lockBoard] = [null, null, false];
+}
+
+function startTimer() {
+    time = countdownStart;
+    timerDisplay.textContent = formatTime(time);
+
+    clearInterval(timer);
+    timer = setInterval(() => {
+            time--;
+            timerDisplay.textContent = formatTime(time);
+            
+            if(time <= 0){
+                clearInterval(timer);
+                alert("Time is gone! Game over!")
+                setupGame();
+            }
+        
+        timerDisplay.textContent = formatTime(time);
+    }, 1000);
 }
 
 function createBoard() {
@@ -42,12 +99,16 @@ function flipCard(card: Card) {
     createBoard();
 
     if(!firstCard) {
+        // First card is selected
         firstCard = card;
     } else if(!secondCard) {
+        // Second card is selected
         secondCard = card;
         lockBoard = true;
+        moves++;
+        moveCounter.textContent = moves.toString();
         checkFotMatch();
-    }
+    } 
 }
 
 function checkFotMatch() {
@@ -60,26 +121,25 @@ function checkFotMatch() {
             if (firstCard) firstCard.isFlipped = false;
             if (secondCard) secondCard.isFlipped = false;
             resetBoard();
+            createBoard();
         }, 1000);
     }
     createBoard();
     checkForWin();
 }
 
-function resetBoard() {
-    [firstCard, secondCard, lockBoard] = [null, null, false];
-}
 
 function checkForWin() {
     const winnerMessage = document.getElementById('winnerMessage')
     const confetti = document.getElementById('confetti');
     if(winnerMessage && confetti && cards.every(card => card.isMatched)){
-        winnerMessage.innerText = "You won this game!";
+        clearInterval(timer);
+        winnerMessage.innerText = "You won the game!";
         confetti.attributeStyleMap.clear();
           setTimeout(() => {
             winnerMessage.innerText = "";
             confetti.attributeStyleMap.set("display", "none");
-        }, 5000);
+        }, 6000);
         setupGame();
     }
 }
