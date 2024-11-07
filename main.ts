@@ -49,6 +49,7 @@ function resetGame() {
     timerDisplay.textContent = countdownMode ? formatTime(countdownStart) : "0:00"
 }
 
+//Write the time in format: 0:00
 function formatTime(seconds : number): string {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -107,11 +108,11 @@ function flipCard(card: Card) {
         lockBoard = true;
         moves++;
         moveCounter.textContent = moves.toString();
-        checkFotMatch();
+        checkForMatch();
     } 
 }
 
-function checkFotMatch() {
+function checkForMatch() {
     if(firstCard && secondCard && firstCard.value === secondCard.value) {
         firstCard.isMatched = true;
         secondCard.isMatched = true;
@@ -121,7 +122,7 @@ function checkFotMatch() {
             if (firstCard) firstCard.isFlipped = false;
             if (secondCard) secondCard.isFlipped = false;
             resetBoard();
-            createBoard();
+            createBoard(); //Flips the cards back if there is no match
         }, 1000);
     }
     createBoard();
